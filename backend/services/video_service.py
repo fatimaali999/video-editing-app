@@ -4,7 +4,6 @@ from datetime import datetime
 from models.video import Video
 from bson.objectid import ObjectId
 from werkzeug.utils import secure_filename
-import magic
 import cv2
 import numpy as np
 from moviepy.editor import VideoFileClip
@@ -1401,14 +1400,9 @@ class VideoService:
         self.videos.delete_one({"_id": ObjectId(video_id)})
 
     def _is_valid_video(self, filepath):
-        try:
-            mime = magic.Magic(mime=True)
-            file_type = mime.from_file(filepath)
-            return file_type.startswith('video/')
-        except:
-            # Fallback: check file extension
-            valid_extensions = ['.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv']
-            return any(filepath.lower().endswith(ext) for ext in valid_extensions)
+        # Check file extension for video formats
+        valid_extensions = ['.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv']
+        return any(filepath.lower().endswith(ext) for ext in valid_extensions)
 
     def _extract_metadata(self, video):
         try:
