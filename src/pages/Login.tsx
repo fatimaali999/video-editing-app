@@ -281,6 +281,22 @@ const Login = () => {
                 Or use credentials: demo@snipx.com / demo1234
               </p>
             </div>
+
+            {/* Admin Login Link */}
+            <div className="mt-4 bg-gradient-to-r from-gray-800 to-gray-900 border-2 border-gray-700 rounded-xl p-4 animate-slide-up-3d">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-100 mb-1">Admin Access</h4>
+                  <p className="text-xs text-gray-400">For administrators only</p>
+                </div>
+                <Link
+                  to="/admin/login"
+                  className="bg-gradient-to-r from-gray-700 to-gray-800 text-white py-2 px-4 rounded-lg font-medium hover:from-gray-600 hover:to-gray-700 transition-all duration-300 border border-gray-600 transform hover:scale-105 hover:shadow-lg text-sm"
+                >
+                  Admin Login →
+                </Link>
+              </div>
+            </div>
           </div>
 
           {/* Footer */}
