@@ -1976,99 +1976,76 @@ class VideoService:
                     os.remove(audio_path)
                 return
             
-            # Try to use Whisper for real transcription
+            # Use OpenAI Whisper API instead of local model (Railway RAM constraints)
             try:
-                print(f"[SUBTITLE DEBUG] Attempting Whisper transcription...")
-                import whisper
-                print(f"[SUBTITLE DEBUG] Whisper imported successfully")
+                print(f"[SUBTITLE DEBUG] Using OpenAI Whisper API (cloud-based)...")
+                import openai
+                import os
                 
-                # FFmpeg is now configured in app.py and injected into system PATH
-                # Whisper will automatically find it via the PATH
-                print(f"[SUBTITLE DEBUG] FFmpeg configured via system PATH in app.py")
+                # Get API key from environment
+                openai_api_key = os.getenv('OPENAI_API_KEY')
+                if not openai_api_key:
+                    raise Exception("OPENAI_API_KEY not set in environment variables")
                 
-                # Use appropriate model based on language
-                model_size = self._get_optimal_whisper_model(language)
-                print(f"[SUBTITLE DEBUG] Loading Whisper model: {model_size}")
-                model = whisper.load_model(model_size)
-                print(f"[SUBTITLE DEBUG] Whisper model loaded successfully")
+                print(f"[SUBTITLE DEBUG] OpenAI API key found")
                 
-                whisper_lang = self._get_whisper_language_code(language)
-                print(f"[SUBTITLE DEBUG] Using Whisper language code: {whisper_lang}")
-                
-                # Preprocess audio for better recognition (especially for Urdu)
+                # Preprocess audio for better recognition
                 processed_audio_path = self._preprocess_audio_for_transcription(audio_path, language)
                 print(f"[SUBTITLE DEBUG] Audio preprocessed for {language}")
                 
-                # Use Whisper's built-in audio loader (it uses ffmpeg internally)
-                print(f"[SUBTITLE DEBUG] Loading audio with Whisper's audio loader...")
-                audio_data = whisper.load_audio(processed_audio_path)
-                # Whisper's audio is already at 16kHz and normalized
-                print(f"[SUBTITLE DEBUG] Audio loaded: duration={len(audio_data)/16000:.2f}s")
+                # Map language codes
+                whisper_lang = self._get_whisper_language_code(language)
+                print(f"[SUBTITLE DEBUG] Using language code: {whisper_lang}")
                 
-                # Force the requested language instead of auto-detecting
-                print(f"[SUBTITLE DEBUG] Using requested language: {whisper_lang} (no auto-detection)")
+                # Use OpenAI Whisper API
+                print(f"[SUBTITLE DEBUG] Calling OpenAI Whisper API...")
+                client = openai.OpenAI(api_key=openai_api_key)
+                
+                with open(processed_audio_path, 'rb') as audio_file:
+                    transcript = client.audio.transcriptions.create(
+                        model="whisper-1",
+                        file=audio_file,
+                        language=whisper_lang,
+                        response_format="verbose_json",
+                        timestamp_granularities=["segment"]
+                    )
+                
+                print(f"[SUBTITLE DEBUG] OpenAI API response received")
+                result = {
+                    'segments': transcript.segments,
+                    'language': transcript.language
+                }
+                print(f"[SUBTITLE DEBUG] Transcription completed with {len(result['segments'])} segments")
                 
                 # Keep track of original language for post-processing (important for Roman Urdu)
                 original_language = language  # 'ru-ur', 'ur', 'en', etc.
                 print(f"[SUBTITLE DEBUG] Original language for post-processing: {original_language}")
                 
-                # No translation needed - transcribe directly in requested language
-                needs_translation = False
-                source_lang = whisper_lang
-                target_lang = whisper_lang
-                
-                # Transcription options optimized for source language
-                transcription_options = self._get_transcription_options(source_lang)
-                print(f"[SUBTITLE DEBUG] Using transcription options: {transcription_options}")
-                
-                # Use librosa-loaded audio data for transcription (no FFmpeg dependency)
-                print(f"[SUBTITLE DEBUG] Starting transcription with loaded audio data...")
-                result = model.transcribe(
-                    audio_data,
-                    language=whisper_lang,
-                    fp16=False,  # Disable FP16 for CPU compatibility
-                    **transcription_options
-                )
-                
-                print(f"[SUBTITLE DEBUG] Whisper transcription completed")
-                print(f"[SUBTITLE DEBUG] Found {len(result.get('segments', []))} segments")
-                print(f"[SUBTITLE DEBUG] Detected language: {result.get('language', 'unknown')}")
-                
-                # Extract segments with timestamps
+                # Extract segments with timestamps from OpenAI response
                 segments = []
                 total_whisper_segments = len(result.get('segments', []))
-                print(f"[SUBTITLE DEBUG] Processing {total_whisper_segments} segments from Whisper...")
+                print(f"[SUBTITLE DEBUG] Processing {total_whisper_segments} segments from OpenAI Whisper...")
                 
                 for i, segment in enumerate(result['segments']):
-                    # Post-process text using original language (important for Roman Urdu transliteration)
-                    text = self._post_process_transcription(segment['text'].strip(), original_language)
+                    # Post-process text using original language
+                    text = self._post_process_transcription(segment.get('text', '').strip(), original_language)
                     
                     # Skip empty segments
                     if not text or len(text.strip()) == 0:
                         print(f"[SUBTITLE DEBUG] Skipping empty segment {i+1}")
                         continue
                     
-                    # Detect and skip hallucinated/repetitive text (unless disabled)
-                    if not disable_hallucination_filter and self._is_hallucinated_text(text):
-                        print(f"[SUBTITLE DEBUG] Skipping hallucinated segment {i+1}: '{text[:100]}...'")
-                        continue
-                    
                     segments.append({
-                        'start': segment['start'],
-                        'end': segment['end'],
+                        'start': segment.get('start', 0.0),
+                        'end': segment.get('end', 0.0),
                         'text': text,
-                        'confidence': segment.get('avg_logprob', 0.0)  # Track confidence
+                        'confidence': 1.0  # OpenAI doesn't provide confidence
                     })
-                    print(f"[SUBTITLE DEBUG] ✓ Segment {i+1}/{total_whisper_segments}: {segment['start']:.2f}s-{segment['end']:.2f}s: '{text[:80]}...'")
+                    print(f"[SUBTITLE DEBUG] ✓ Segment {i+1}/{total_whisper_segments}: {segment.get('start', 0.0):.2f}s-{segment.get('end', 0.0):.2f}s: '{text[:80]}...'")
                 
-                print(f"[SUBTITLE DEBUG] Successfully processed {len(segments)}/{total_whisper_segments} segments from Whisper")
-                print(f"[SUBTITLE DEBUG] Filtered out: {total_whisper_segments - len(segments)} segments (empty or hallucinated)")
+                print(f"[SUBTITLE DEBUG] Successfully processed {len(segments)}/{total_whisper_segments} segments from OpenAI Whisper")
                 
-                # Translate segments if needed
-                if needs_translation and len(segments) > 0:
-                    print(f"[SUBTITLE DEBUG] Translating from {source_lang} to {target_lang}...")
-                    segments = self._translate_segments(segments, source_lang, target_lang)
-                    print(f"[SUBTITLE DEBUG] Translation completed")
+                # No translation needed - OpenAI Whisper transcribes in target language
                 
                 # Check if we have valid segments after filtering
                 if len(segments) == 0:
