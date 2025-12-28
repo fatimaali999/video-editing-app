@@ -1146,16 +1146,14 @@ def get_recent_activity(admin_id):
     except Exception as e:
         logger.exception("Error getting recent activity")
         return jsonify({'error': 'Internal server error'}), 500
-@app.route('/')
-def health_check():
-    return jsonify({"status": "online", "message": "SnipX Backend is running!"}), 200
+
 @app.route('/')
 def home():
-    return {
+    return jsonify({
         "status": "online",
         "message": "SnipX Backend is live!",
         "database": "Connected"
-    }, 200
+    }), 200
 
 if __name__ == '__main__':
     # Use the PORT variable provided by Railway
