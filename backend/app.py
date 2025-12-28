@@ -1,3 +1,9 @@
+import os
+
+# Configure FFmpeg paths BEFORE any imports that might load MoviePy
+os.environ.setdefault('IMAGEIO_FFMPEG_EXE', 'ffmpeg')
+os.environ.setdefault('FFMPEG_BINARY', 'ffmpeg')
+
 from flask import Flask, request, jsonify, redirect, url_for, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -7,7 +13,6 @@ from authlib.integrations.flask_client import OAuth
 from datetime import datetime
 from dotenv import load_dotenv
 import logging
-import os
 from bson import ObjectId
 
 
