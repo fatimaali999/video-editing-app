@@ -1,29 +1,31 @@
 import os
-import sys
 import shutil
 import subprocess
 
-# 1. Locate FFmpeg - critical for Whisper subtitle generation
+# 1. Find where FFmpeg actually lives
 ffmpeg_path = shutil.which("ffmpeg") or "/usr/bin/ffmpeg"
 
-# 2. FORCE IT INTO THE SYSTEM PATH
-# This is what Whisper specifically needs - it calls ffmpeg directly as a system command
+# 2. Extract the folder containing ffmpeg (e.g., /usr/bin)
 ffmpeg_dir = os.path.dirname(ffmpeg_path)
+
+# 3. Force that folder into the system PATH environment variable
 if ffmpeg_dir not in os.environ["PATH"]:
     os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ["PATH"]
 
-# 3. Keep these for MoviePy and other libraries
+# 4. Standard MoviePy settings (keep these)
 os.environ["IMAGEIO_FFMPEG_EXE"] = ffmpeg_path
 os.environ["FFMPEG_BINARY"] = ffmpeg_path
 
-print(f"--- SYSTEM PATH UPDATED: {os.environ['PATH']} ---", file=sys.stderr)
+# --- VERIFICATION LOG ---
+print(f"--- FFMPEG PATH INJECTED: {ffmpeg_path} ---")
 try:
-    # Verify FFmpeg is actually callable now
-    version = subprocess.check_output(["ffmpeg", "-version"], stderr=subprocess.STDOUT)
-    print("--- FFMPEG VERIFIED AND WORKING ---", file=sys.stderr)
+    # This simulates exactly what Whisper does
+    result = subprocess.run(["ffmpeg", "-version"], capture_output=True, text=True)
+    print("--- FFMPEG SYSTEM TEST: SUCCESS ---")
 except Exception as e:
-    print(f"--- FFMPEG VERIFICATION FAILED: {e} ---", file=sys.stderr)
+    print(f"--- FFMPEG SYSTEM TEST: FAILED. Error: {e} ---")
 
+import sys
 # Now import Flask and other libraries
 from flask import Flask, request, jsonify, redirect, url_for, send_file
 from flask_cors import CORS
