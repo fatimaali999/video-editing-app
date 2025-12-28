@@ -1,18 +1,20 @@
 import os
 import sys
+import subprocess
+import shutil
 
-# Configure MoviePy FFmpeg BEFORE any imports
-# Try imageio-ffmpeg bundled binary first, fallback to auto-download
-try:
-    import imageio_ffmpeg
-    ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
-    print(f"[FFMPEG] imageio-ffmpeg returned: {ffmpeg_exe}", file=sys.stderr)
-    os.environ['IMAGEIO_FFMPEG_EXE'] = ffmpeg_exe
-    os.environ['FFMPEG_BINARY'] = ffmpeg_exe
-except Exception as e:
-    print(f"[FFMPEG] imageio-ffmpeg failed: {e}", file=sys.stderr)
-    # Fallback: Let imageio auto-download ffmpeg on first use
-    os.environ['IMAGEIO_FFMPEG_EXE'] = 'auto'
+# 1. Try to find the system path of ffmpeg automatically
+ffmpeg_path = shutil.which('ffmpeg')
+
+# 2. If the system finds it, use that. If not, use 'ffmpeg' as a last resort.
+if ffmpeg_path:
+    os.environ['IMAGEIO_FFMPEG_EXE'] = ffmpeg_path
+    os.environ['FFMPEG_BINARY'] = ffmpeg_path
+    print(f"--- FFMPEG FOUND AT: {ffmpeg_path} ---")
+else:
+    os.environ['IMAGEIO_FFMPEG_EXE'] = 'ffmpeg'
+    os.environ['FFMPEG_BINARY'] = 'ffmpeg'
+    print("--- FFMPEG NOT FOUND IN SYSTEM PATH ---")
 
 from flask import Flask, request, jsonify, redirect, url_for, send_file
 from flask_cors import CORS
