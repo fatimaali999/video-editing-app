@@ -252,18 +252,36 @@ class AIThumbnailGenerator:
         draw = ImageDraw.Draw(img)
         width, height = img.size
         
-        # Try to load bold font for impact
-        try:
-            font_size = min(width // 12, 100)  # Larger font for impact
-            font = ImageFont.truetype("arialbd.ttf", font_size)
-        except:
+        # Try to load bold font for impact - cross-platform font paths
+        font_size = min(width // 12, 100)  # Larger font for impact
+        font = None
+        
+        # Try multiple font paths for Windows and Linux
+        font_paths = [
+            # Windows fonts
+            "arialbd.ttf",
+            "Arial Bold.ttf", 
+            "arial.ttf",
+            "C:\\Windows\\Fonts\\arialbd.ttf",
+            "C:\\Windows\\Fonts\\arial.ttf",
+            # Linux fonts (Railway/Ubuntu)
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+            "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        ]
+        
+        for font_path in font_paths:
             try:
-                font = ImageFont.truetype("Arial Bold.ttf", font_size)
+                font = ImageFont.truetype(font_path, font_size)
+                print(f"[THUMBNAIL] Loaded font: {font_path}")
+                break
             except:
-                try:
-                    font = ImageFont.truetype("arial.ttf", font_size)
-                except:
-                    font = ImageFont.load_default()
+                continue
+        
+        if font is None:
+            print("[THUMBNAIL] Warning: Using default font - install fonts for better quality")
+            font = ImageFont.load_default()
         
         # Calculate text size and wrap if needed
         words = text.split()
