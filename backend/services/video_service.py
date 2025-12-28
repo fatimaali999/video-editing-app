@@ -2159,16 +2159,10 @@ class VideoService:
 
     def _get_optimal_whisper_model(self, language):
         """Get optimal Whisper model size based on language"""
-        # Use balanced models - fast but accurate
-        if language in ['ur', 'ru-ur']:
-            # Use medium for Urdu - good balance of speed and accuracy
-            return "medium"  # Good accuracy, much faster than large
-        elif language in ['ar', 'hi', 'zh', 'ja', 'ko']:
-            return "small"  # Small model for complex scripts - faster
-        elif language in ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'nl']:
-            return "base"    # Base model for well-supported languages - fast
-        else:
-            return "tiny"   # Tiny model for other languages - very fast
+        # Use TINY model for Railway's limited RAM (512MB-1GB free tier)
+        # Tiny model uses ~300MB RAM vs Base's ~1GB+
+        print(f"[WHISPER MODEL] Using 'tiny' model to avoid OOM on Railway free tier")
+        return "tiny"  # 39MB download, ~300MB RAM - works on limited resources
 
     def _preprocess_audio_for_transcription(self, audio_path, language):
         """Preprocess audio for better transcription accuracy"""
