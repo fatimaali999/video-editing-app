@@ -26,6 +26,7 @@ RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 # Set the port (Railway uses $PORT)
 ENV PORT=8080
 
-# Start the app
-# We use sh -c to force the shell to process the $PORT variable
-CMD ["sh", "-c", "gunicorn app:app --bind 0.0.0.0:${PORT} --timeout 180 --workers 1"]
+# Start the app with increased timeout and logging
+# Worker timeout increased to 600 seconds (10 minutes) for Whisper processing
+# Graceful timeout increased to handle long-running subtitle generation
+CMD ["sh", "-c", "gunicorn app:app --bind 0.0.0.0:${PORT} --timeout 600 --graceful-timeout 600 --workers 1 --log-level debug"]

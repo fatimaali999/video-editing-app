@@ -17,13 +17,15 @@ os.environ["IMAGEIO_FFMPEG_EXE"] = ffmpeg_path
 os.environ["FFMPEG_BINARY"] = ffmpeg_path
 
 # --- VERIFICATION LOG ---
-print(f"--- FFMPEG PATH INJECTED: {ffmpeg_path} ---")
+print(f"=== FFMPEG CONFIGURED: {ffmpeg_path} ===")
+print(f"=== PATH: {os.environ['PATH'][:200]} ===")
 try:
     # This simulates exactly what Whisper does
     result = subprocess.run(["ffmpeg", "-version"], capture_output=True, text=True)
-    print("--- FFMPEG SYSTEM TEST: SUCCESS ---")
+    print("=== FFMPEG TEST: SUCCESS ===")
+    print(f"=== FFMPEG VERSION: {result.stdout.split()[2] if result.stdout else 'unknown'} ===")
 except Exception as e:
-    print(f"--- FFMPEG SYSTEM TEST: FAILED. Error: {e} ---")
+    print(f"=== FFMPEG TEST: FAILED - {e} ===")
 
 import sys
 # Now import Flask and other libraries
