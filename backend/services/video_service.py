@@ -5,10 +5,11 @@ from models.video import Video
 from bson.objectid import ObjectId
 from werkzeug.utils import secure_filename
 
-# Configure FFmpeg paths for MoviePy BEFORE importing it
-# Nixpacks makes ffmpeg available in PATH, so we just use 'ffmpeg'
-os.environ.setdefault('IMAGEIO_FFMPEG_EXE', 'ffmpeg')
-os.environ.setdefault('FFMPEG_BINARY', 'ffmpeg')
+# Configure FFmpeg to use imageio-ffmpeg bundled binary
+import imageio_ffmpeg
+ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
+os.environ['IMAGEIO_FFMPEG_EXE'] = ffmpeg_path
+os.environ['FFMPEG_BINARY'] = ffmpeg_path
 
 import cv2
 import numpy as np
