@@ -19,18 +19,26 @@ if 'IMAGEIO_FFMPEG_EXE' not in os.environ:
         print(f"[FFMPEG VIDEO_SERVICE] Error: {e}", file=sys.stderr)
         os.environ['IMAGEIO_FFMPEG_EXE'] = 'auto'
 
-import cv2
-import numpy as np
-from moviepy.editor import VideoFileClip
-from pydub import AudioSegment
-from pydub.effects import normalize, compress_dynamic_range
-from pydub.silence import split_on_silence, detect_nonsilent
-from transformers import BlipProcessor, BlipForConditionalGeneration
-import torch
-from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
-import librosa
-import scipy.signal
-import re
+# Import required libraries with error handling
+try:
+    import cv2
+    import numpy as np
+    from moviepy.editor import VideoFileClip
+    from pydub import AudioSegment
+    from pydub.effects import normalize, compress_dynamic_range
+    from pydub.silence import split_on_silence, detect_nonsilent
+    from transformers import BlipProcessor, BlipForConditionalGeneration
+    import torch
+    from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
+    import librosa
+    import scipy.signal
+    import re
+    print("[VIDEO_SERVICE] All imports successful")
+except ImportError as e:
+    print(f"[VIDEO_SERVICE] CRITICAL: Import failed: {e}")
+    import traceback
+    traceback.print_exc()
+    raise
 
 # Set FFmpeg path for Windows
 # Try multiple possible locations
@@ -1360,32 +1368,45 @@ class VideoService:
         video.process_start_time = datetime.utcnow()
         video.processing_options = options
         
+        print(f"[PROCESS_VIDEO] Starting processing for video: {video_id}")
+        print(f"[PROCESS_VIDEO] Options: {options}")
+        
         try:
             # Enhanced processing with actual options
             if options.get('cut_silence'):
+                print(f"[PROCESS_VIDEO] Running cut_silence...")
                 self._cut_silence(video)
             
             if options.get('enhance_audio'):
+                print(f"[PROCESS_VIDEO] Running enhance_audio...")
                 self._enhance_audio(video, options)
             
             if options.get('generate_thumbnail'):
+                print(f"[PROCESS_VIDEO] Running generate_thumbnail...")
                 self._generate_thumbnail(video, options)
             
             if options.get('generate_subtitles'):
+                print(f"[PROCESS_VIDEO] Running generate_subtitles...")
                 self._generate_subtitles(video, options)
             
             if options.get('summarize'):
+                print(f"[PROCESS_VIDEO] Running summarize_video...")
                 self._summarize_video(video)
 
             # Apply video enhancements (including AI color enhancement)
             if any([options.get('stabilization'), options.get('brightness'), options.get('contrast'), 
                     options.get('saturation'), options.get('ai_color_enhancement')]):
+                print(f"[PROCESS_VIDEO] Running video_enhancements...")
                 self._apply_video_enhancements(video, options)
 
             video.status = "completed"
             video.process_end_time = datetime.utcnow()
+            print(f"[PROCESS_VIDEO] Processing completed successfully")
             
         except Exception as e:
+            print(f"[PROCESS_VIDEO] ERROR: {type(e).__name__}: {str(e)}")
+            import traceback
+            traceback.print_exc()
             video.status = "failed"
             video.error = str(e)
             video.process_end_time = datetime.utcnow()

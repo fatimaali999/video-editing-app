@@ -1,7 +1,30 @@
-
+import os
 import sys
 import shutil
-import os
+import subprocess
+
+# 1. Locate FFmpeg - critical for Whisper subtitle generation
+ffmpeg_path = shutil.which("ffmpeg") or "/usr/bin/ffmpeg"
+
+# 2. FORCE IT INTO THE SYSTEM PATH
+# This is what Whisper specifically needs - it calls ffmpeg directly as a system command
+ffmpeg_dir = os.path.dirname(ffmpeg_path)
+if ffmpeg_dir not in os.environ["PATH"]:
+    os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ["PATH"]
+
+# 3. Keep these for MoviePy and other libraries
+os.environ["IMAGEIO_FFMPEG_EXE"] = ffmpeg_path
+os.environ["FFMPEG_BINARY"] = ffmpeg_path
+
+print(f"--- SYSTEM PATH UPDATED: {os.environ['PATH']} ---", file=sys.stderr)
+try:
+    # Verify FFmpeg is actually callable now
+    version = subprocess.check_output(["ffmpeg", "-version"], stderr=subprocess.STDOUT)
+    print("--- FFMPEG VERIFIED AND WORKING ---", file=sys.stderr)
+except Exception as e:
+    print(f"--- FFMPEG VERIFICATION FAILED: {e} ---", file=sys.stderr)
+
+# Now import Flask and other libraries
 from flask import Flask, request, jsonify, redirect, url_for, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -343,9 +366,18 @@ def process_video(user_id, video_id):
         return jsonify({'message': 'Processing completed successfully'}), 200
     except Exception as e:
         logger.error(f"Process error: {str(e)}")
+        logger.error(f"Error type: {type(e).__name__}")
         import traceback
-        traceback.print_exc()
-        return jsonify({'error': 'Internal server error'}), 500
+        error_trace = traceback.format_exc()
+        logger.error(f"Full traceback:\n{error_trace}")
+        print(f"[PROCESS ERROR] {error_trace}")
+        
+        # Return more detailed error for debugging
+        return jsonify({
+            'error': 'Internal server error',
+            'message': str(e),
+            'type': type(e).__name__
+        }), 500
 
 @app.route('/api/videos/<video_id>', methods=['GET'])
 @require_auth
