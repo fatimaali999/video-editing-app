@@ -2,11 +2,7 @@
 nixPkgs = ["python311", "ffmpeg"]
 
 [phases.install]
-cmds = ["pip install -r requirements.txt"]
+cmds = ["python -m venv /app/.venv", "/app/.venv/bin/pip install -r requirements.txt"]
 
 [start]
-cmd = "gunicorn app:app --bind 0.0.0.0:$PORT"
-
-[variables]
-IMAGEIO_FFMPEG_EXE = "ffmpeg"
-FFMPEG_BINARY = "ffmpeg"
+cmd = "/app/.venv/bin/gunicorn app:app --bind 0.0.0.0:$PORT --timeout 180 --workers 1"

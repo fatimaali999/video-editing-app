@@ -1,20 +1,8 @@
-import os
+
 import sys
-import subprocess
 import shutil
 
-# 1. Try to find the system path of ffmpeg automatically
-ffmpeg_path = shutil.which('ffmpeg')
 
-# 2. If the system finds it, use that. If not, use 'ffmpeg' as a last resort.
-if ffmpeg_path:
-    os.environ['IMAGEIO_FFMPEG_EXE'] = ffmpeg_path
-    os.environ['FFMPEG_BINARY'] = ffmpeg_path
-    print(f"--- FFMPEG FOUND AT: {ffmpeg_path} ---")
-else:
-    os.environ['IMAGEIO_FFMPEG_EXE'] = 'ffmpeg'
-    os.environ['FFMPEG_BINARY'] = 'ffmpeg'
-    print("--- FFMPEG NOT FOUND IN SYSTEM PATH ---")
 
 from flask import Flask, request, jsonify, redirect, url_for, send_file
 from flask_cors import CORS
@@ -64,6 +52,15 @@ CORS(app,
 # App secret
 app.config['SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH', 500 * 1024 * 1024))
+
+
+# Force path to ffmpeg
+os.environ["IMAGEIO_FFMPEG_EXE"] = "ffmpeg"
+os.environ["FFMPEG_BINARY"] = "ffmpeg"
+
+# Print for debugging
+print(f"DEBUG: Port is {os.environ.get('PORT')}")
+
 
 # MongoDB connection with fallback to Atlas
 def connect_mongodb():
