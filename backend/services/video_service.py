@@ -1980,7 +1980,6 @@ class VideoService:
             try:
                 print(f"[SUBTITLE DEBUG] Using OpenAI Whisper API (cloud-based)...")
                 import openai
-                import os
                 
                 # Get API key from environment
                 openai_api_key = os.getenv('OPENAI_API_KEY')
