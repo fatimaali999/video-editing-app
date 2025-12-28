@@ -18,6 +18,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the app
 COPY . .
 
+# Create uploads directory for video processing
+RUN mkdir -p /app/uploads && chmod 777 /app/uploads
+
 # Set the port (Railway uses $PORT)
 ENV PORT=8080
 

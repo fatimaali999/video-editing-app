@@ -46,7 +46,8 @@ POSSIBLE_FFMPEG_PATHS = [
 
 FFMPEG_PATH = None
 for path in POSSIBLE_FFMPEG_PATHS:
-    if os.path.exists(path) and os.path.exists(os.path.join(path, 'ffmpeg.exe')):
+    ffmpeg_binary = os.path.join(path, 'ffmpeg.exe' if os.name == 'nt' else 'ffmpeg')
+    if os.path.exists(path) and os.path.exists(ffmpeg_binary):
         FFMPEG_PATH = path
         break
 
@@ -54,16 +55,20 @@ if FFMPEG_PATH:
     if FFMPEG_PATH not in os.environ.get('PATH', ''):
         os.environ['PATH'] = FFMPEG_PATH + os.pathsep + os.environ.get('PATH', '')
     
+    # Determine binary extension based on OS
+    ffmpeg_binary = 'ffmpeg.exe' if os.name == 'nt' else 'ffmpeg'
+    ffprobe_binary = 'ffprobe.exe' if os.name == 'nt' else 'ffprobe'
+    
     # Set FFmpeg for imageio
-    os.environ['IMAGEIO_FFMPEG_EXE'] = os.path.join(FFMPEG_PATH, 'ffmpeg.exe')
+    os.environ['IMAGEIO_FFMPEG_EXE'] = os.path.join(FFMPEG_PATH, ffmpeg_binary)
     
     # CRITICAL: Set FFmpeg for audioread (used by librosa)
-    os.environ['AUDIOREAD_FFMPEG'] = os.path.join(FFMPEG_PATH, 'ffmpeg.exe')
+    os.environ['AUDIOREAD_FFMPEG'] = os.path.join(FFMPEG_PATH, ffmpeg_binary)
     
     # Configure AudioSegment to use FFmpeg
-    AudioSegment.converter = os.path.join(FFMPEG_PATH, 'ffmpeg.exe')
-    AudioSegment.ffmpeg = os.path.join(FFMPEG_PATH, 'ffmpeg.exe')
-    AudioSegment.ffprobe = os.path.join(FFMPEG_PATH, 'ffprobe.exe')
+    AudioSegment.converter = os.path.join(FFMPEG_PATH, ffmpeg_binary)
+    AudioSegment.ffmpeg = os.path.join(FFMPEG_PATH, ffmpeg_binary)
+    AudioSegment.ffprobe = os.path.join(FFMPEG_PATH, ffprobe_binary)
     
     # Whisper FFmpeg configuration will be done inside the function when needed
     # to avoid import errors on Linux where .exe doesn't exist
@@ -1251,7 +1256,9 @@ class VideoService:
     def __init__(self, db):
         self.db = db
         self.videos = db.videos
-        self.upload_folder = os.getenv('UPLOAD_FOLDER', 'uploads')
+        # Use absolute path for uploads folder (important for Railway)
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.upload_folder = os.getenv('UPLOAD_FOLDER', os.path.join(base_dir, 'uploads'))
         self.max_content_length = int(os.getenv('MAX_CONTENT_LENGTH', 500 * 1024 * 1024))
         
         # Initialize enhancers
@@ -2685,7 +2692,13 @@ class VideoService:
         export_path = os.path.join(self.upload_folder, export_filename)
         
         # Build FFmpeg command
-        ffmpeg_path = os.path.join(FFMPEG_PATH, 'ffmpeg.exe')
+        # Use system ffmpeg on Linux (Railway), or Windows path if available
+        if FFMPEG_PATH:
+            ffmpeg_binary = 'ffmpeg.exe' if os.name == 'nt' else 'ffmpeg'
+            ffmpeg_path = os.path.join(FFMPEG_PATH, ffmpeg_binary)
+        else:
+            # On Railway/Linux, use system ffmpeg
+            ffmpeg_path = 'ffmpeg'
         
         # Build filter complex for video
         video_filters = []
