@@ -1,15 +1,23 @@
 import os
+import sys
 import json
 from datetime import datetime
 from models.video import Video
 from bson.objectid import ObjectId
 from werkzeug.utils import secure_filename
 
-# Configure FFmpeg to use imageio-ffmpeg bundled binary
-import imageio_ffmpeg
-ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
-os.environ['IMAGEIO_FFMPEG_EXE'] = ffmpeg_path
-os.environ['FFMPEG_BINARY'] = ffmpeg_path
+# Configure FFmpeg - use environment variable set by app.py
+# If not set, try imageio-ffmpeg
+if 'IMAGEIO_FFMPEG_EXE' not in os.environ:
+    try:
+        import imageio_ffmpeg
+        ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+        print(f"[FFMPEG VIDEO_SERVICE] Using: {ffmpeg_exe}", file=sys.stderr)
+        os.environ['IMAGEIO_FFMPEG_EXE'] = ffmpeg_exe
+        os.environ['FFMPEG_BINARY'] = ffmpeg_exe
+    except Exception as e:
+        print(f"[FFMPEG VIDEO_SERVICE] Error: {e}", file=sys.stderr)
+        os.environ['IMAGEIO_FFMPEG_EXE'] = 'auto'
 
 import cv2
 import numpy as np

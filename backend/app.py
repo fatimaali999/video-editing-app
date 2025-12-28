@@ -1,9 +1,18 @@
 import os
+import sys
 
-# Configure MoviePy to use imageio-ffmpeg (bundled binary) BEFORE any imports
-import imageio_ffmpeg
-os.environ['IMAGEIO_FFMPEG_EXE'] = imageio_ffmpeg.get_ffmpeg_exe()
-os.environ['FFMPEG_BINARY'] = imageio_ffmpeg.get_ffmpeg_exe()
+# Configure MoviePy FFmpeg BEFORE any imports
+# Try imageio-ffmpeg bundled binary first, fallback to auto-download
+try:
+    import imageio_ffmpeg
+    ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+    print(f"[FFMPEG] imageio-ffmpeg returned: {ffmpeg_exe}", file=sys.stderr)
+    os.environ['IMAGEIO_FFMPEG_EXE'] = ffmpeg_exe
+    os.environ['FFMPEG_BINARY'] = ffmpeg_exe
+except Exception as e:
+    print(f"[FFMPEG] imageio-ffmpeg failed: {e}", file=sys.stderr)
+    # Fallback: Let imageio auto-download ffmpeg on first use
+    os.environ['IMAGEIO_FFMPEG_EXE'] = 'auto'
 
 from flask import Flask, request, jsonify, redirect, url_for, send_file
 from flask_cors import CORS
