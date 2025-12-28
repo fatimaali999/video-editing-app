@@ -1,8 +1,9 @@
 import os
 
-# Configure FFmpeg paths BEFORE any imports that might load MoviePy
-os.environ.setdefault('IMAGEIO_FFMPEG_EXE', 'ffmpeg')
-os.environ.setdefault('FFMPEG_BINARY', 'ffmpeg')
+# Configure MoviePy to use imageio-ffmpeg (bundled binary) BEFORE any imports
+import imageio_ffmpeg
+os.environ['IMAGEIO_FFMPEG_EXE'] = imageio_ffmpeg.get_ffmpeg_exe()
+os.environ['FFMPEG_BINARY'] = imageio_ffmpeg.get_ffmpeg_exe()
 
 from flask import Flask, request, jsonify, redirect, url_for, send_file
 from flask_cors import CORS
