@@ -27,7 +27,22 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+
+# Configure CORS with specific origins
+ALLOWED_ORIGINS = [
+    'http://localhost:5173',  # Local Vite dev server
+    'http://localhost:3000',  # Alternative local dev port
+    os.getenv('FRONTEND_URL', ''),  # Production frontend URL from env variable
+]
+
+# Filter out empty strings
+ALLOWED_ORIGINS = [origin for origin in ALLOWED_ORIGINS if origin]
+
+CORS(app, 
+     resources={r"/api/*": {"origins": ALLOWED_ORIGINS}},
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 # App secret
 app.config['SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
