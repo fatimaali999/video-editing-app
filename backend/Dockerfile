@@ -22,4 +22,5 @@ COPY . .
 ENV PORT=8080
 
 # Start the app
-CMD gunicorn app:app --bind 0.0.0.0:$PORT --timeout 180 --workers 1
+# We use sh -c to force the shell to process the $PORT variable
+CMD ["sh", "-c", "gunicorn app:app --bind 0.0.0.0:${PORT} --timeout 180 --workers 1"]
