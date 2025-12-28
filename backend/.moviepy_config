@@ -1,2 +1,2 @@
-FFMPEG_BINARY=/nix/var/nix/profiles/default/bin/ffmpeg
-IMAGEIO_FFMPEG_EXE=/nix/var/nix/profiles/default/bin/ffmpeg
+FFMPEG_BINARY=ffmpeg
+IMAGEIO_FFMPEG_EXE=ffmpeg
