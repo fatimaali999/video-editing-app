@@ -20,7 +20,7 @@ print("     python app.py")
 print("   • Wait for message: 'Running on http://0.0.0.0:5001'")
 
 print("\n2️⃣  CHECK CONNECTION:")
-print("   • Open browser and go to: http://localhost:5001/")
+print("   • Open browser and go to: http://import.meta.env.VITE_API_URL/")
 print("   • You should see a response (not 'Cannot connect')")
 
 print("\n3️⃣  TEST ADMIN LOGIN:")
@@ -42,7 +42,7 @@ print()
 print("   ❌ Frontend shows wrong port:")
 print("      → Check frontend is using port 5001")
 print("      → Check: src/pages/AdminLogin.tsx")
-print("      → Should have: API_URL = 'http://localhost:5001'")
+print("      → Should have: API_URL = 'http://import.meta.env.VITE_API_URL'")
 
 print("\n5️⃣  RESET ADMIN PASSWORD:")
 print("   • Navigate to backend:")
@@ -97,7 +97,7 @@ print("\n" + "=" * 60)
 # Test if backend is running
 try:
     import requests
-    response = requests.get('http://localhost:5001/', timeout=2)
+    response = requests.get('http://import.meta.env.VITE_API_URL/', timeout=2)
     print("✅ Backend: Running on port 5001")
 except requests.exceptions.ConnectionError:
     print("❌ Backend: NOT running")
