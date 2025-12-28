@@ -168,7 +168,7 @@ C:\Users\Cv\Desktop\fypdec\FYP\
    ↓
 4. User clicks "Sign Up" button
    ↓
-5. Signup.tsx calls → axios.post('http://localhost:5001/api/auth/register')
+5. Signup.tsx calls → axios.post('http://import.meta.env.VITE_API_URL/api/auth/register')
    ↓
 6. Request backend ko jaata hai → app.py line 200 (@app.route('/api/auth/register'))
    ↓
@@ -193,7 +193,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   try {
     // Backend API call
-    const response = await axios.post('http://localhost:5001/api/auth/register', {
+    const response = await axios.post('http://import.meta.env.VITE_API_URL/api/auth/register', {
       name, email, password
     });
     
@@ -307,7 +307,7 @@ const handleVideoUpload = async (file: File) => {
   try {
     // Upload video
     const response = await axios.post(
-      'http://localhost:5001/api/videos/upload', 
+      'http://import.meta.env.VITE_API_URL/api/videos/upload', 
       formData,
       {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -322,7 +322,7 @@ const handleVideoUpload = async (file: File) => {
     
     // Start polling for status
     const interval = setInterval(async () => {
-      const statusRes = await axios.get(`http://localhost:5001/api/videos/${videoId}`);
+      const statusRes = await axios.get(`http://import.meta.env.VITE_API_URL/api/videos/${videoId}`);
       
       if (statusRes.data.status === 'completed') {
         clearInterval(interval);
@@ -759,7 +759,7 @@ python init_db.py
 # Server start karo
 python app.py
 ```
-Server chalu ho jayega: **http://localhost:5001**
+Server chalu ho jayega: **http://import.meta.env.VITE_API_URL**
 
 ### Step 4: Environment Variables (Optional)
 Create `.env` file in backend folder:

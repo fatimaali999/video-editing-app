@@ -21,7 +21,7 @@ python app.py
 #### Option B: Using API (Postman/cURL)
 ```powershell
 # Generate Urdu subtitles
-curl -X POST http://localhost:5001/api/videos/{video_id}/subtitles/generate `
+curl -X POST http://import.meta.env.VITE_API_URL/api/videos/{video_id}/subtitles/generate `
   -H "Authorization: Bearer YOUR_TOKEN" `
   -H "Content-Type: application/json" `
   -d '{\"language\": \"ur\", \"style\": \"clean\"}'

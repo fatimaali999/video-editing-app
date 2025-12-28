@@ -925,7 +925,7 @@ Automatisch generiert von SnipX AI`
       }
 
       // Fetch the video file from the backend
-      const response = await fetch(`http://localhost:5001/api/videos/${uploadedVideoId}/download`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001/api'}/videos/${uploadedVideoId}/download`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`

@@ -523,7 +523,7 @@ export function useAuth() {
 // src/services/api.ts
 import { z } from 'zod';
 
-const API_URL = 'http://localhost:5001/api';
+const API_URL = 'http://import.meta.env.VITE_API_URL/api';
 
 // Validation schemas using Zod
 const loginSchema = z.object({

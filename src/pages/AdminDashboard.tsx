@@ -28,7 +28,8 @@ ChartJS.register(
   Legend
 );
 
-const API_URL = 'http://localhost:5001';
+// ✅ This tells the app to use the Netlify variable if it exists
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 interface DashboardStats {
   total_users: number;
