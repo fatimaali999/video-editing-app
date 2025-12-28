@@ -65,17 +65,14 @@ if FFMPEG_PATH:
     AudioSegment.ffmpeg = os.path.join(FFMPEG_PATH, 'ffmpeg.exe')
     AudioSegment.ffprobe = os.path.join(FFMPEG_PATH, 'ffprobe.exe')
     
-    # CRITICAL: Set FFmpeg path for Whisper (it needs FFmpeg to load audio files)
-    import whisper
-    whisper.audio.FFMPEG_PATH = os.path.join(FFMPEG_PATH, 'ffmpeg.exe')
+    # Whisper FFmpeg configuration will be done inside the function when needed
+    # to avoid import errors on Linux where .exe doesn't exist
     
     print(f"[INFO] FFmpeg configured at: {FFMPEG_PATH}")
-    print(f"[INFO] FFmpeg path set for Whisper: {whisper.audio.FFMPEG_PATH}")
-    print(f"[INFO] FFmpeg path set for audioread: {os.environ['AUDIOREAD_FFMPEG']}")
+    print(f"[INFO] FFmpeg path set for audioread: {os.environ.get('AUDIOREAD_FFMPEG', 'N/A')}")
 else:
-    print("[WARNING] FFmpeg not found in common locations. Please ensure FFmpeg is installed and in PATH.")
-    print("[WARNING] You can install FFmpeg using: winget install Gyan.FFmpeg")
-    print("[WARNING] Subtitle generation will not work without FFmpeg!")
+    print("[WARNING] FFmpeg not found in common Windows locations - assuming Linux with system FFmpeg")
+    print("[INFO] On Railway/Linux, FFmpeg is installed via Dockerfile apt-get")
 
 class AIThumbnailGenerator:
     """AI-powered YouTube thumbnail generator with BLIP captioning and intelligent frame selection"""
