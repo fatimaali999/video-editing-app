@@ -1982,9 +1982,9 @@ class VideoService:
                 import whisper
                 print(f"[SUBTITLE DEBUG] Whisper imported successfully")
                 
-                # Verify FFmpeg is available
-                if not FFMPEG_PATH:
-                    raise Exception("FFmpeg not configured - cannot load audio for transcription")
+                # FFmpeg is now configured in app.py and injected into system PATH
+                # Whisper will automatically find it via the PATH
+                print(f"[SUBTITLE DEBUG] FFmpeg configured via system PATH in app.py")
                 
                 # Use appropriate model based on language
                 model_size = self._get_optimal_whisper_model(language)
