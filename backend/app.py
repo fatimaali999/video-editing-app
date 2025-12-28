@@ -10,6 +10,7 @@ import logging
 import os
 from bson import ObjectId
 
+
 from services.auth_service import AuthService
 from services.video_service import VideoService
 from services.support_service import SupportService
@@ -1145,6 +1146,18 @@ def get_recent_activity(admin_id):
     except Exception as e:
         logger.exception("Error getting recent activity")
         return jsonify({'error': 'Internal server error'}), 500
+@app.route('/')
+def health_check():
+    return jsonify({"status": "online", "message": "SnipX Backend is running!"}), 200
+@app.route('/')
+def home():
+    return {
+        "status": "online",
+        "message": "SnipX Backend is live!",
+        "database": "Connected"
+    }, 200
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    # Use the PORT variable provided by Railway
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host='0.0.0.0', port=port)
