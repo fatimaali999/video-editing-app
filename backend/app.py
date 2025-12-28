@@ -35,6 +35,7 @@ app = Flask(__name__)
 ALLOWED_ORIGINS = [
     'http://localhost:5173',  # Local Vite dev server
     'http://localhost:3000',  # Alternative local dev port
+    'https://video-editing-app-kappa.vercel.app',  # Production Vercel frontend
     os.getenv('FRONTEND_URL', ''),  # Production frontend URL from env variable
 ]
 
