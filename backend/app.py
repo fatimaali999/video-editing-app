@@ -31,22 +31,20 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Configure CORS with specific origins
-ALLOWED_ORIGINS = [
-    'http://localhost:5173',  # Local Vite dev server
-    'http://localhost:3000',  # Alternative local dev port
-    'https://video-editing-app-kappa.vercel.app',  # Production Vercel frontend
-    os.getenv('FRONTEND_URL', ''),  # Production frontend URL from env variable
-]
-
-# Filter out empty strings
-ALLOWED_ORIGINS = [origin for origin in ALLOWED_ORIGINS if origin]
-
+# Configure CORS - Bulletproof configuration for all routes
 CORS(app, 
-     resources={r"/api/*": {"origins": ALLOWED_ORIGINS}},
-     supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+     resources={
+         r"/*": {
+             "origins": [
+                 "https://video-editing-app-kappa.vercel.app",
+                 "http://localhost:5173",
+                 "http://localhost:3000"
+             ],
+             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+             "allow_headers": ["Content-Type", "Authorization"],
+             "supports_credentials": True
+         }
+     })
 
 # App secret
 app.config['SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')

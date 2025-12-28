@@ -508,7 +508,7 @@ const Profile = () => {
                                   onClick={async () => {
                                     try {
                                       toast.loading('Preparing download...');
-                                      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001/api'}/videos/${video.id}/download`, {
+                                      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/videos/${video.id}/download`, {
                                         headers: {
                                           'Authorization': `Bearer ${localStorage.getItem('token')}`
                                         }
