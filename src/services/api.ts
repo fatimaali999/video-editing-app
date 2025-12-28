@@ -108,7 +108,7 @@ export class ApiService {
 
   static async login(email: string, password: string) {
     const validated = loginSchema.parse({ email, password });
-    const data = await this.request('/auth/login', {
+    const data = await this.request('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(validated)
     });
@@ -123,7 +123,7 @@ export class ApiService {
     lastName: string;
   }) {
     const validated = registerSchema.parse(data);
-    return this.request('/auth/register', {
+    return this.request('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify(validated)
     });
@@ -140,7 +140,7 @@ export class ApiService {
       }, 200);
       
       try {
-        const result = await this.request('/upload', {
+        const result = await this.request('/api/upload', {
           method: 'POST',
           body: formData
         });
@@ -153,7 +153,7 @@ export class ApiService {
       }
     }
     
-    return this.request('/upload', {
+    return this.request('/api/upload', {
       method: 'POST',
       body: formData
     });
@@ -180,14 +180,14 @@ export class ApiService {
     thumbnail_frame_index?: number | null;
   }) {
     const validated = videoOptionsSchema.parse(options);
-    return this.request(`/videos/${videoId}/process`, {
+    return this.request(`/api/videos/${videoId}/process`, {
       method: 'POST',
       body: JSON.stringify({ options: validated })
     });
   }
 
   static async getVideoStatus(videoId: string) {
-    return this.request(`/videos/${videoId}`);
+    return this.request(`/api/videos/${videoId}`);
   }
 
   static async getVideo(videoId: string) {
@@ -195,11 +195,11 @@ export class ApiService {
   }
 
   static async getUserVideos() {
-    return this.request('/videos');
+    return this.request('/api/videos');
   }
 
   static async deleteVideo(videoId: string) {
-    return this.request(`/videos/${videoId}`, {
+    return this.request(`/api/videos/${videoId}`, {
       method: 'DELETE'
     });
   }
@@ -210,7 +210,7 @@ export class ApiService {
     style: string;
     format?: 'srt' | 'json' | 'both';
   }) {
-    return this.request(`/videos/${videoId}/subtitles/advanced`, {
+    return this.request(`/api/videos/${videoId}/subtitles/advanced`, {
       method: 'POST',
       body: JSON.stringify(options)
     });
@@ -222,7 +222,7 @@ export class ApiService {
     timestamps?: number[];
     style?: 'auto' | 'manual';
   } = {}) {
-    return this.request(`/videos/${videoId}/thumbnails/generate`, {
+    return this.request(`/api/videos/${videoId}/thumbnails/generate`, {
       method: 'POST',
       body: JSON.stringify(options)
     });
@@ -235,7 +235,7 @@ export class ApiService {
     volumeBoost?: number;
     equalization?: boolean;
   } = {}) {
-    return this.request(`/videos/${videoId}/audio/enhance`, {
+    return this.request(`/api/videos/${videoId}/audio/enhance`, {
       method: 'POST',
       body: JSON.stringify(options)
     });
@@ -243,18 +243,18 @@ export class ApiService {
 
   // Get processing status with real-time updates
   static async getProcessingStatus(videoId: string) {
-    return this.request(`/videos/${videoId}/status`);
+    return this.request(`/api/videos/${videoId}/status`);
   }
 
   // Get subtitle data in JSON format for live preview
   static async getSubtitleData(videoId: string, language: string) {
-    return this.request(`/videos/${videoId}/subtitles/${language}/json`);
+    return this.request(`/api/videos/${videoId}/subtitles/${language}/json`);
   }
 
   // Get video subtitles for player
   static async getVideoSubtitles(videoId: string): Promise<SubtitleData[]> {
     try {
-      const response = await this.request(`/videos/${videoId}/subtitles`);
+      const response = await this.request(`/api/videos/${videoId}/subtitles`);
       console.log('[ApiService] getVideoSubtitles response:', response);
       
       // Handle different response formats
@@ -279,7 +279,7 @@ export class ApiService {
     language: string;
     style: string;
   }) {
-    return this.request(`/videos/${videoId}/subtitles/generate`, {
+    return this.request(`/api/videos/${videoId}/subtitles/generate`, {
       method: 'POST',
       body: JSON.stringify(options)
     });
@@ -287,7 +287,7 @@ export class ApiService {
 
   // Profile management
   static async getUserProfile() {
-    return this.request('/profile');
+    return this.request('/api/profile');
   }
 
   static async updateUserProfile(data: {
@@ -296,7 +296,7 @@ export class ApiService {
     email?: string;
     preferences?: Record<string, any>;
   }) {
-    return this.request('/profile', {
+    return this.request('/api/profile', {
       method: 'PUT',
       body: JSON.stringify(data)
     });
@@ -304,19 +304,19 @@ export class ApiService {
 
   // Admin endpoints
   static async getAdminStats() {
-    return this.request('/admin/stats');
+    return this.request('/api/admin/stats');
   }
 
   static async getAllUsers() {
-    return this.request('/admin/users');
+    return this.request('/api/admin/users');
   }
 
   static async getAllVideos() {
-    return this.request('/admin/videos');
+    return this.request('/api/admin/videos');
   }
 
   static async updateUserStatus(userId: string, status: string) {
-    return this.request(`/admin/users/${userId}/status`, {
+    return this.request(`/api/admin/users/${userId}/status`, {
       method: 'PUT',
       body: JSON.stringify({ status })
     });
@@ -331,7 +331,7 @@ export class ApiService {
     priority: string;
     type: string;
   }) {
-    return this.request('/support/tickets', {
+    return this.request('/api/support/tickets', {
       method: 'POST',
       body: JSON.stringify(data)
     });
@@ -349,7 +349,7 @@ export class ApiService {
     video_volume?: number;
     mute_original?: boolean;
   }) {
-    return this.request(`/videos/${videoId}/export`, {
+    return this.request(`/api/videos/${videoId}/export`, {
       method: 'POST',
       body: JSON.stringify(options)
     });
@@ -358,7 +358,7 @@ export class ApiService {
   // Download exported video
   static async downloadExportedVideo(videoId: string): Promise<Blob> {
     const token = this.getToken();
-    const response = await fetch(`${API_URL}/videos/${videoId}/download-export`, {
+    const response = await fetch(`${API_URL}/api/videos/${videoId}/download-export`, {
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       }
@@ -374,7 +374,7 @@ export class ApiService {
   // Download processed video
   static async downloadVideo(videoId: string): Promise<Blob> {
     const token = this.getToken();
-    const response = await fetch(`${API_URL}/videos/${videoId}/download`, {
+    const response = await fetch(`${API_URL}/api/videos/${videoId}/download`, {
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       }
@@ -390,7 +390,7 @@ export class ApiService {
   // Download subtitle file
   static async downloadSubtitles(videoId: string, language: string, format: 'srt' | 'json' = 'srt'): Promise<Blob> {
     const token = this.getToken();
-    const response = await fetch(`${API_URL}/videos/${videoId}/subtitles/${language}/download?format=${format}`, {
+    const response = await fetch(`${API_URL}/api/videos/${videoId}/subtitles/${language}/download?format=${format}`, {
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       }
@@ -405,7 +405,7 @@ export class ApiService {
 
   // Delete user account
   static async deleteAccount() {
-    return this.request('/auth/delete-account', {
+    return this.request('/api/auth/delete-account', {
       method: 'DELETE'
     });
   }
@@ -417,11 +417,11 @@ export class ApiService {
     const tokenParam = token ? `token=${encodeURIComponent(token)}` : '';
     const separator = indexParam && tokenParam ? '&' : '';
     const queryString = indexParam || tokenParam ? `?${indexParam}${separator}${tokenParam}` : '';
-    return `${API_URL}/videos/${videoId}/thumbnail${queryString}`;
+    return `${API_URL}/api/videos/${videoId}/thumbnail${queryString}`;
   }
 
   // Get all thumbnails for a video
   static async getVideoThumbnails(videoId: string) {
-    return this.request(`/videos/${videoId}/thumbnails`);
+    return this.request(`/api/videos/${videoId}/thumbnails`);
   }
 }
